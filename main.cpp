@@ -1,5 +1,4 @@
 #include <iostream>
-#include <vector>
 #include "objects.h"
 #include "loop.h"
 
@@ -11,8 +10,10 @@ int main(int argc,char** argv) {
     al_init_font_addon();
     al_init_ttf_addon();
 
+
     sterowanie control;
     ALLEGRO_DISPLAY* disp = al_create_display(control.res.getWidth(),control.res.getHeight());
+    control.disp = disp;
     auto event = new ALLEGRO_EVENT;
     ALLEGRO_EVENT_QUEUE* kolejka = al_create_event_queue();
     auto st = new ALLEGRO_KEYBOARD_STATE;
@@ -20,6 +21,7 @@ int main(int argc,char** argv) {
     auto thread1 = al_create_thread(eventLoop,eventGroup);
     ALLEGRO_FONT * fnt = al_create_builtin_font();
 
+    al_set_window_title(disp,"Tetris");
     al_register_event_source(kolejka,al_get_display_event_source(disp));
     al_register_event_source(kolejka,al_get_keyboard_event_source());
     al_get_keyboard_state(st);
@@ -28,7 +30,7 @@ int main(int argc,char** argv) {
         al_clear_to_color(al_map_rgb(0,0,0));
         switch(control.state) {
             case PS_MENU:
-                mainLoopMenu(disp,&control);
+                mainMenuLoop(disp, &control);
                 break;
             default:
                 al_draw_text(fnt,al_map_rgb(255,50,50),10,50,0,"Niepoprawny stan programu, uruchom ponownie grę");

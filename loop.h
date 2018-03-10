@@ -5,8 +5,8 @@
 #define TETRIS_LOOP_H
 
 
-void mainLoopMenu(ALLEGRO_DISPLAY *disp, sterowanie *control) {
-    Menu menu(control->menutype);
+void mainMenuLoop(ALLEGRO_DISPLAY* disp, sterowanie *control) {
+    Menu menu(control->menutype,control);
     bool e = true;
     auto titleFont = al_load_ttf_font("fonts/title.ttf",int(0.3*control->res.getHeight()),0);
     while (e && !control->close) {
@@ -14,7 +14,7 @@ void mainLoopMenu(ALLEGRO_DISPLAY *disp, sterowanie *control) {
         if(!titleFont) titleFont = al_create_builtin_font();
         al_draw_text(titleFont,
                      al_map_rgb(40,234,132),
-                     0.1f*control->res.getWidth(),
+                     0.3f*control->res.getWidth(),
                      0.2f*control->res.getHeight(),
                      0,
                      "TETRIS"
@@ -46,6 +46,25 @@ void mainLoopMenu(ALLEGRO_DISPLAY *disp, sterowanie *control) {
                 control->menutype = MT_SETTINGS;
                 menu.changeMenuType(control->menutype);
             }
+            if(menu.getActiveElement()->getName() == "800x600"){
+                control->res.changeResolution(RES_800X600,disp);
+            }
+            if(menu.getActiveElement()->getName() == "1024x768"){
+                control->res.changeResolution(RES_1024X768,disp);
+            }
+            if(menu.getActiveElement()->getName() == "1280x720"){
+                control->res.changeResolution(RES_1280X720,disp);
+            }
+            if(menu.getActiveElement()->getName() == "1366x768"){
+                control->res.changeResolution(RES_1366X768,disp);
+            }
+            if(menu.getActiveElement()->getName() == "1600x900"){
+                control->res.changeResolution(RES_1600X900,disp);
+            }
+            if(menu.getActiveElement()->getName() == "1920x1080"){
+                control->res.changeResolution(RES_1920X1080,disp);
+            }
+
             control->enter = false;
         }
         al_flip_display();
