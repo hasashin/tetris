@@ -11,11 +11,11 @@ int main(int argc,char** argv) {
     al_init_font_addon();
     al_init_ttf_addon();
 
-    ALLEGRO_DISPLAY* disp = al_create_display(600,600);
+    sterowanie control;
+    ALLEGRO_DISPLAY* disp = al_create_display(control.res.getWidth(),control.res.getHeight());
     auto event = new ALLEGRO_EVENT;
     ALLEGRO_EVENT_QUEUE* kolejka = al_create_event_queue();
     auto st = new ALLEGRO_KEYBOARD_STATE;
-    sterowanie control;
     auto eventGroup = new EVENT_HANDLER(kolejka,event,&control,st);
     auto thread1 = al_create_thread(eventLoop,eventGroup);
     ALLEGRO_FONT * fnt = al_create_builtin_font();

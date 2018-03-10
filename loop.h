@@ -8,11 +8,17 @@
 void mainLoopMenu(ALLEGRO_DISPLAY *disp, sterowanie *control) {
     Menu menu(control->menutype);
     bool e = true;
-    auto titleFont = al_load_ttf_font("fonts/title.ttf",100,0);
+    auto titleFont = al_load_ttf_font("fonts/title.ttf",int(0.3*control->res.getHeight()),0);
     while (e && !control->close) {
         al_clear_to_color(al_map_rgb(0,0,0));
         if(!titleFont) titleFont = al_create_builtin_font();
-        al_draw_text(titleFont,al_map_rgb(40,234,132),10,10,0,"TETRIS");
+        al_draw_text(titleFont,
+                     al_map_rgb(40,234,132),
+                     0.1f*control->res.getWidth(),
+                     0.2f*control->res.getHeight(),
+                     0,
+                     "TETRIS"
+        );
 
         menu.changeActiveElement(&(control->menutoggle));
         menu.displayMenu();
@@ -25,12 +31,19 @@ void mainLoopMenu(ALLEGRO_DISPLAY *disp, sterowanie *control) {
                 control->menutype = MT_SETTINGS;
                 menu.changeMenuType(control->menutype);
             }
-
             if (menu.getActiveElement()->getName() == "close") {
                 control->close = true;
             }
             if(menu.getActiveElement()->getName() == "backfromsettings"){
                 control->menutype = MT_MAIN;
+                menu.changeMenuType(control->menutype);
+            }
+            if(menu.getActiveElement()->getName() == "resolution"){
+                control->menutype = MT_RES;
+                menu.changeMenuType(control->menutype);
+            }
+            if(menu.getActiveElement()->getName() == "backfromres"){
+                control->menutype = MT_SETTINGS;
                 menu.changeMenuType(control->menutype);
             }
             control->enter = false;
