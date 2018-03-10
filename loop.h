@@ -5,13 +5,13 @@
 #define TETRIS_LOOP_H
 
 
-void mainMenuLoop(ALLEGRO_DISPLAY* disp, sterowanie *control) {
+void mainMenuLoop(sterowanie *control) {
     Menu menu(control->menutype,control);
     bool e = true;
     auto titleFont = al_load_ttf_font("fonts/title.ttf",int(0.3*control->res.getHeight()),0);
+    if(!titleFont) titleFont = al_create_builtin_font();
     while (e && !control->close) {
         al_clear_to_color(al_map_rgb(0,0,0));
-        if(!titleFont) titleFont = al_create_builtin_font();
         al_draw_text(titleFont,
                      al_map_rgb(40,234,132),
                      0.3f*control->res.getWidth(),
@@ -46,25 +46,44 @@ void mainMenuLoop(ALLEGRO_DISPLAY* disp, sterowanie *control) {
                 control->menutype = MT_SETTINGS;
                 menu.changeMenuType(control->menutype);
             }
-            if(menu.getActiveElement()->getName() == "800x600"){
-                control->res.changeResolution(RES_800X600,disp);
+            if(menu.getActiveElement()->getName() == "fullscreen"){
+                al_set_display_flag(control->disp,
+                                    ALLEGRO_FULLSCREEN_WINDOW,
+                                    !(al_get_display_flags(control->disp) & ALLEGRO_FULLSCREEN_WINDOW)
+                );
+                al_resize_display(control->disp,control->res.getWidth(),control->res.getHeight());
+                control->fullscreen = bool(al_get_display_flags(control->disp) & ALLEGRO_FULLSCREEN_WINDOW);
+                if(control->fullscreen) menu.getActiveElement()->setOptSetting(": TAK");
+                else menu.getActiveElement()->setOptSetting(": NIE");
             }
-            if(menu.getActiveElement()->getName() == "1024x768"){
-                control->res.changeResolution(RES_1024X768,disp);
+            if(!control->fullscreen) {
+                if (menu.getActiveElement()->getName() == "800x600") {
+                    control->res.changeResolution(RES_800X600, control->disp);
+                }
+                if (menu.getActiveElement()->getName() == "1024x768") {
+                    control->res.changeResolution(RES_1024X768, control->disp);
+                }
+                if (menu.getActiveElement()->getName() == "1280x720") {
+                    control->res.changeResolution(RES_1280X720, control->disp);
+                }
+                if (menu.getActiveElement()->getName() == "1366x768") {
+                    control->res.changeResolution(RES_1366X768, control->disp);
+                }
+                if (menu.getActiveElement()->getName() == "1600x900") {
+                    control->res.changeResolution(RES_1600X900, control->disp);
+                }
+                if (menu.getActiveElement()->getName() == "1920x1080") {
+                    control->res.changeResolution(RES_1920X1080, control->disp);
+                }
             }
-            if(menu.getActiveElement()->getName() == "1280x720"){
-                control->res.changeResolution(RES_1280X720,disp);
+            else{
+                if(menu.getMenuType() == MT_RES){
+                    al_resize_display(control->disp,
+                                      menu.getActiveElement()->getDisplayMode()->width,
+                                      menu.getActiveElement()->getDisplayMode()->height
+                    );
+                }
             }
-            if(menu.getActiveElement()->getName() == "1366x768"){
-                control->res.changeResolution(RES_1366X768,disp);
-            }
-            if(menu.getActiveElement()->getName() == "1600x900"){
-                control->res.changeResolution(RES_1600X900,disp);
-            }
-            if(menu.getActiveElement()->getName() == "1920x1080"){
-                control->res.changeResolution(RES_1920X1080,disp);
-            }
-
             control->enter = false;
         }
         al_flip_display();
