@@ -3,7 +3,7 @@ project(tetris)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(tetris main.cpp loop.h objects.h)
+add_executable(tetris main.cpp loop.h menuObjects.h)
 
 set(GLOBAL_LIBRARIES "liballegro.dylib" "liballegro_main.dylib" "liballegro_font.dylib" "liballegro_ttf.dylib")
 

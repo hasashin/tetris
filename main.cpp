@@ -1,5 +1,5 @@
 #include <iostream>
-#include "objects.h"
+#include "menuObjects.h"
 #include "loop.h"
 
 
@@ -30,7 +30,7 @@ int main(int argc,char** argv) {
         al_clear_to_color(al_map_rgb(0,0,0));
         switch(control.state) {
             case PS_MENU:
-                mainMenuLoop(disp, &control);
+                mainMenuLoop(&control);
                 break;
             default:
                 al_draw_text(fnt,al_map_rgb(255,50,50),10,50,0,"Niepoprawny stan programu, uruchom ponownie grę");

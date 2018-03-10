@@ -22,7 +22,6 @@ enum menuType {
     MT_MAIN,
     MT_SETTINGS,
     MT_RES,
-    MT_FULLSCRN,
     MT_MUSIC
 };
 enum resType {
@@ -120,11 +119,20 @@ struct EVENT_HANDLER {
 };
 
 class MenuElement {
+protected:
     const std::string Name, Value;
     bool Active;
+    ALLEGRO_DISPLAY_MODE* dispMode;
+    unsigned int id;
+    std::string optSetting;
 public:
-    MenuElement(std::string Name_, std::string Value_) : Name(Name_), Value(Value_) {
+    MenuElement(std::string Name_,
+                std::string Value_,
+                ALLEGRO_DISPLAY_MODE* dispMode_,
+                unsigned int id_
+    ) : Name(Name_), Value(Value_), dispMode(dispMode_),id(id_) {
         Active = false;
+        optSetting = "";
     }
 
     void toggleActiveFlag() {
@@ -142,6 +150,18 @@ public:
     std::string getValue() {
         return Value;
     }
+    unsigned int getId(){
+        return id;
+    }
+    ALLEGRO_DISPLAY_MODE* getDisplayMode(){
+        return dispMode;
+    }
+    void setOptSetting(std::string optSetting_){
+        optSetting = optSetting_;
+    }
+    std::string getOptSetting(){
+        return optSetting;
+    }
 };
 
 class Menu {
@@ -149,6 +169,7 @@ protected:
     std::vector<MenuElement> elementsList;
     std::vector<MenuElement>::iterator activeElement = elementsList.begin();
     sterowanie *control;
+    menuType type=MT_MAIN;
 public:
     explicit Menu(menuType type, sterowanie *control_) : control(control_) {
         elementsList.clear();
@@ -159,42 +180,49 @@ public:
         elementsList.clear();
         switch (type) {
             case MT_MAIN:
-                elementsList.push_back(MenuElement("newgame", "Nowa Gra"));
-                elementsList.push_back(MenuElement("settings", "Ustawienia"));
-                elementsList.push_back(MenuElement("close", "Zakończ"));
+                type = MT_MAIN;
+                elementsList.push_back(MenuElement("newgame", "Nowa Gra",nullptr,0));
+                elementsList.push_back(MenuElement("settings", "Ustawienia",nullptr,1));
+                elementsList.push_back(MenuElement("close", "Zakończ",nullptr,2));
                 setActiveElement(0);
                 break;
             case MT_SETTINGS:
-                elementsList.push_back(MenuElement("music", "Ustawienia muzyki"));
-                elementsList.push_back(MenuElement("resolution", "Rozdzielczość ekranu"));
-                elementsList.push_back(MenuElement("fullscreen", "Pełny ekran"));
-                elementsList.push_back(MenuElement("backfromsettings", "Wróć"));
+                type = MT_SETTINGS;
+                elementsList.push_back(MenuElement("music", "Ustawienia muzyki",nullptr,0));
+                elementsList.push_back(MenuElement("resolution", "Rozdzielczość ekranu",nullptr,1));
+                elementsList.push_back(MenuElement("fullscreen", "Pełny ekran",nullptr,2));
+                if(control->fullscreen) elementsList[2].setOptSetting(": TAK");
+                else elementsList[2].setOptSetting(": NIE");
+                elementsList.push_back(MenuElement("backfromsettings", "Wróć",nullptr,3));
                 setActiveElement(0);
                 break;
             case MT_RES: {
+                type = MT_RES;
                 if(control->fullscreen){
-                    int active;
-                    for(int i = (int)control->res.getFullscreenDisplayModes().size()-1;i<=0;i--){
+                    for(int i = int(control->res.getFullscreenDisplayModes().size())-1;i >=0;i--){
                         std::string ss;
-                        ss = control->res.getFullscreenDisplayModes()[i]->width;
+                        ss = std::to_string(control->res.getFullscreenDisplayModes()[i]->width);
                         ss += "x";
-                        ss += control->res.getFullscreenDisplayModes()[i]->height;
-                        elementsList.push_back(MenuElement(ss,ss));
+                        ss += std::to_string(control->res.getFullscreenDisplayModes()[i]->height);
+                        elementsList.push_back(MenuElement(ss,ss,control->res.getFullscreenDisplayModes()[i],(unsigned int)i));
                         if(al_get_display_width(control->disp) == control->res.getFullscreenDisplayModes()[i]->width
                                 && al_get_display_height(control->disp) == control->res.getFullscreenDisplayModes()[i]->height){
                             setActiveElement(i);
                         }
+                        else{
+                            setActiveElement(0);
+                        }
                     }
-                    elementsList.push_back(MenuElement("backfromres","Wróć"));
+                    elementsList.push_back(MenuElement("backfromres","Wróć",nullptr,(unsigned int)control->res.getFullscreenDisplayModes().size()));
                 }
                 else {
-                    elementsList.emplace_back(MenuElement("800x600", "800x600"));
-                    elementsList.push_back(MenuElement("1024x768", "1024x768"));
-                    elementsList.push_back(MenuElement("1280x720", "1280x720"));
-                    elementsList.push_back(MenuElement("1366x768", "1366x768"));
-                    elementsList.push_back(MenuElement("1600x900", "1600x900"));
-                    elementsList.push_back(MenuElement("1920x1080", "1920x1080"));
-                    elementsList.push_back(MenuElement("backfromres", "Wróć"));
+                    elementsList.push_back(MenuElement("800x600", "800x600",nullptr,0));
+                    elementsList.push_back(MenuElement("1024x768", "1024x768",nullptr,1));
+                    elementsList.push_back(MenuElement("1280x720", "1280x720",nullptr,2));
+                    elementsList.push_back(MenuElement("1366x768", "1366x768",nullptr,3));
+                    elementsList.push_back(MenuElement("1600x900", "1600x900",nullptr,4));
+                    elementsList.push_back(MenuElement("1920x1080", "1920x1080",nullptr,5));
+                    elementsList.push_back(MenuElement("backfromres", "Wróć",nullptr,6));
                     int i = 0;
                     for (auto &elem:elementsList) {
                         if (std::stoi(elem.getName().substr(0, elem.getName().find('x'))) == control->res.getWidth()
@@ -207,10 +235,11 @@ public:
                 }
                 break;
             }
+            case MT_MUSIC:
+                type = MT_MUSIC;
+                break;
             default:
                 break;
-            case MT_FULLSCRN:break;
-            case MT_MUSIC:break;
         }
     }
 
@@ -232,7 +261,7 @@ public:
                     0.3f*control->res.getWidth(),
                     300 + i,
                     0,
-                    elem.getValue().data()
+                    (elem.getValue() + elem.getOptSetting()).data()
             );
             i += 30;
         }
@@ -272,6 +301,9 @@ public:
 
     std::vector<MenuElement>::iterator getActiveElement() {
         return activeElement;
+    }
+    menuType getMenuType(){
+        return type;
     }
 };
 
